@@ -1,0 +1,35 @@
+Goldorack Go
+============
+
+> Goldorak GO ! Rétrolaser en action
+> Goldorak GO !! Va accomplir ta mission
+> Dans l'infini
+> Des galaxies
+> Poursuis ta lutte infernale
+> Du bien contre le mal
+
+
+Purpose
+-------
+
+Goldorak GO is a mini framework for the Go programming language.
+It's based on several components (web.go, gostache and Go-Redis),
+and is only a toy (not production-ready).
+
+
+Links
+-----
+
+* http://golang.org/ The Go Programming Language
+* http://www.getwebgo.com/ Web.Go framework
+* http://github.com/hoisie/gostache Gostache
+* http://github.com/hoisie/Go-Redis Go-Redis
+* http://github.com/antirez/redis Redis
+
+
+Credits
+-------
+
+    Copyright (c) 2010 Bruno Michel <brmichel@free.fr>
+    Licence GNU AGPL V3+
+
