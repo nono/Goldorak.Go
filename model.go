@@ -1,6 +1,7 @@
 package goldorak
 
 import (
+	"log"
 	"redis"
 	"strconv"
 	"strings"
@@ -8,38 +9,45 @@ import (
 
 type Model struct {
 	db     int
-	client redis.Client
 	name   string
+	client redis.Client
 }
 
 const keySeparator = ":"
 
 func NewModel(name string) *Model {
-	fn := GetConfig("appname") + keySeparator + name
-	db := GetConfig("db")
-	m := new(Model)
-	m.db, _ = strconv.Atoi(db)
-	s := redis.DefaultSpec().Db(m.db)
-	// TODO if e != nil ...
-	m.name = fn
-	m.client, _ = redis.NewSynchClientWithSpec(s)
-	// TODO
-	// if e != nil { log.Stderr ("failed to create the client", e); return "failed" }
+	fullname := GetConfig("appname") + keySeparator + name
+	database := GetConfig("database")
+	db, err  := strconv.Atoi(database)
+	if err != nil {
+		log.Exitf("Can't read the database", err)
+	}
+	spec  := redis.DefaultSpec().Db(db)
+	m     := new(Model)
+	m.db   = db
+	m.name = fullname
+	m.client, err = redis.NewSynchClientWithSpec(spec)
+	if err != nil {
+		log.Exitf("Can't create the client", err)
+	}
 	return m
 }
 
-func (m *Model) FullKey(key string) string {
-	return m.name + keySeparator + key
+func (this *Model) FullKey(key string) string {
+	return this.name + keySeparator + key
 }
 
-func (m *Model) Get(key string) string {
-	value, _ := m.client.Get(m.FullKey(key))
-	// TODO
-	// if e!= nil { log.Stderr ("error on Get", e); return "failed 2" }
+func (this *Model) Get(key string) string {
+	value, err := this.client.Get(this.FullKey(key))
+	if err != nil {
+		log.Stderr("Error on Get", err)
+		// TODO return something
+	}
 	return string(value);
 }
 
-func (m *Model) Set(key string, value string) {
-	m.client.Set(m.FullKey(key), strings.Bytes(value))
+func (this *Model) Set(key string, value string) {
+	this.client.Set(this.FullKey(key), strings.Bytes(value))
+	// TODO error handling
 }
 
