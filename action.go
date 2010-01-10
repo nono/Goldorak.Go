@@ -17,18 +17,18 @@ var defaultLayout *Action = nil
 // TODO not found page?
 // TODO func Restful() ?
 // TODO what about POST/PUT/DELETE?
-func Get(route string, handler func(Action)) {
+func Get(route string, handler func(*Action)) {
 	web.Get(route, func (ctx *web.Context) {
 		action := Action{defaultLayout, "", map[string]string {}}
 		// TODO args.Insert(action)
-		handler(action)
+		handler(&action)
 		ctx.WriteString(action.Render())
 	});
 }
 
-func DefaultLayout(handler func(Action)) {
+func DefaultLayout(handler func(*Action)) {
 	action := Action{nil, "", map[string]string {}}
-	handler(action)
+	handler(&action)
 	defaultLayout = &action
 }
 
@@ -40,9 +40,9 @@ func (this *Action) Assign(key string, value string) {
 	this.locals[key] = value
 }
 
-func (this *Action) Layout(handler func(Action)) {
+func (this *Action) Layout(handler func(*Action)) {
 	action := Action{nil, "", map[string]string {}}
-	handler(action)
+	handler(&action)
 	this.layout = &action
 }
 
@@ -51,6 +51,7 @@ func (this *Action) NoLayout() {
 }
 
 func (this *Action) Render() string {
+	log.Stdoutf("Rendering %s", this.template)
 	filename := GetConfig("templates") + "/" + this.template + ".mustache"
 	output, err := gostache.RenderFile(filename, this.locals)
 	if err != nil {
