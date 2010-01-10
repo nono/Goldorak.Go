@@ -3,49 +3,65 @@ package goldorak
 import (
 	"gostache"
 	"log"
-	"os"
 	"web"
 )
 
 type Action struct {
-	ctx    *web.Context
-	layout string
-	locals map[string]string
+	layout    *Action
+	template  string
+	locals    map[string]string
 }
 
+var defaultLayout *Action = nil
+
+// TODO not found page?
 // TODO func Restful() ?
 // TODO what about POST/PUT/DELETE?
 func Get(route string, handler func(Action)) {
 	web.Get(route, func (ctx *web.Context) {
-		action := Action{ctx, "layout", map[string]string {}}
+		action := Action{defaultLayout, "", map[string]string {}}
 		// TODO args.Insert(action)
 		handler(action)
+		ctx.WriteString(action.Render())
 	});
+}
+
+func DefaultLayout(handler func(Action)) {
+	action := Action{nil, "", map[string]string {}}
+	handler(action)
+	defaultLayout = &action
+}
+
+func (this *Action) Template(template string) {
+	this.template = template
 }
 
 func (this *Action) Assign(key string, value string) {
 	this.locals[key] = value
 }
 
-func (this *Action) Layout(template string) {
-	this.layout = template
+func (this *Action) Layout(handler func(Action)) {
+	action := Action{nil, "", map[string]string {}}
+	handler(action)
+	this.layout = &action
 }
 
-func (this *Action) Render(template string) {
-	filename:= template
-	output, err := this.RenderFile(filename, this.locals)
+func (this *Action) NoLayout() {
+	this.layout = nil
+}
+
+func (this *Action) Render() string {
+	filename := GetConfig("templates") + "/" + this.template + ".mustache"
+	output, err := gostache.RenderFile(filename, this.locals)
 	if err != nil {
 		log.Stderrf("Error on rendering %s", filename, err)
+		return "" // TODO error page
 	}
-	if this.layout != "" {
-		locals := map[string]string {"yield": output}
-		output, err = this.RenderFile(this.layout, locals)
+	if this.layout != nil {
+		this.layout.locals["yield"] = output
+		output = this.layout.Render()
+		this.layout.locals["yield"] = "", false
 	}
-	this.ctx.WriteString(output)
-}
-
-func (this *Action) RenderFile(filename string, context interface{}) (string, os.Error) {
-	file := GetConfig("templates") + "/" + filename + ".mustache"
-	return gostache.RenderFile(file, context)
+	return output
 }
 
