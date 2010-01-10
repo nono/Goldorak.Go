@@ -3,6 +3,7 @@ package goldorak
 import (
 	"gostache"
 	"log"
+	"strings"
 	"web"
 )
 
@@ -17,19 +18,25 @@ var defaultLayout *Action = nil
 // TODO not found page?
 // TODO func Restful() ?
 // TODO what about POST/PUT/DELETE?
-func Get(route string, handler func(*Action)) {
+func Get(route string, handler func(*Action, []string)) {
 	web.Get(route, func (ctx *web.Context) {
-		action := Action{defaultLayout, "", map[string]string {}}
-		// TODO args.Insert(action)
-		handler(&action)
+		action := NewAction()
+		action.layout = defaultLayout
+		params := strings.Split(ctx.Request.URL.Path, "/", 0)
+		handler(&action, params[1:])
+		ctx.StartResponse(200)
 		ctx.WriteString(action.Render())
 	});
 }
 
 func DefaultLayout(handler func(*Action)) {
-	action := Action{nil, "", map[string]string {}}
+	action := NewAction()
 	handler(&action)
 	defaultLayout = &action
+}
+
+func NewAction() Action {
+	return Action{nil, "", make(map[string]string)}
 }
 
 func (this *Action) Template(template string) {
@@ -41,7 +48,7 @@ func (this *Action) Assign(key string, value string) {
 }
 
 func (this *Action) Layout(handler func(*Action)) {
-	action := Action{nil, "", map[string]string {}}
+	action := NewAction()
 	handler(&action)
 	this.layout = &action
 }
