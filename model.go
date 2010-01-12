@@ -22,7 +22,7 @@ type Model struct {
 type Instance struct {
 	model   *Model
 	id      int64
-	param   string
+	Param   string
 }
 
 const keySeparator = ":"
@@ -117,7 +117,7 @@ func (this *Model) Find(param string) *Instance {
 /************/
 
 func (this *Instance) FieldKey(field string) string {
-	return this.param + keySeparator + field
+	return this.Param + keySeparator + field
 }
 
 func (this *Instance) Get(field string) string {

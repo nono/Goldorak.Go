@@ -8,26 +8,40 @@ import (
 )
 
 type Action struct {
+	responded bool
 	layout    *Action
 	template  string
 	locals    map[string]string
+	context   *web.Context
 }
 
 var defaultLayout *Action = nil
 
-// TODO not found page?
-// TODO func Restful() ?
-// TODO what about POST/PUT/DELETE?
-// Note for myself: the last route is the most important one (it's the opposite of Rails)
-func Get(route string, handler func(*Action, []string)) {
-	web.Get(route, func (ctx *web.Context) {
+func ctxHandler(handler func(*Action, []string)) (func(ctx *web.Context)) {
+	f := func(ctx *web.Context) {
 		action := NewAction()
 		action.layout = defaultLayout
-		params := strings.Split(ctx.Request.URL.Path, "/", 0)
-		handler(&action, params[1:])
-		ctx.StartResponse(200)
-		ctx.WriteString(action.Render())
-	});
+		action.context = ctx
+		params := strings.Split(ctx.Request.URL.Path[1:], "/", 0)
+		handler(&action, params)
+		if !action.responded {
+			action.responded = true
+			ctx.StartResponse(200)
+			ctx.WriteString(action.Render())
+		}
+	}
+	return f
+}
+
+// TODO not found page?
+// TODO func Restful() ?
+// Note for myself: the last route is the most important one (it's the opposite of Rails)
+func Get(route string, handler func(*Action, []string)) {
+	web.Get(route, ctxHandler(handler))
+}
+
+func Post(route string, handler func(*Action, []string)) {
+	web.Post(route, ctxHandler(handler))
 }
 
 func DefaultLayout(handler func(*Action)) {
@@ -37,7 +51,7 @@ func DefaultLayout(handler func(*Action)) {
 }
 
 func NewAction() Action {
-	return Action{nil, "", make(map[string]string)}
+	return Action{false, nil, "", make(map[string]string), nil}
 }
 
 func (this *Action) Template(template string) {
@@ -72,5 +86,11 @@ func (this *Action) Render() string {
 		this.layout.locals["yield"] = "", false
 	}
 	return output
+}
+
+func (this *Action) Redirect(path string) {
+	this.responded = true
+	url := "http://" + GetConfig("domain") + path
+	this.context.Redirect(302, url)
 }
 
