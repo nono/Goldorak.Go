@@ -18,6 +18,7 @@ var defaultLayout *Action = nil
 // TODO not found page?
 // TODO func Restful() ?
 // TODO what about POST/PUT/DELETE?
+// Note for myself: the last route is the most important one (it's the opposite of Rails)
 func Get(route string, handler func(*Action, []string)) {
 	web.Get(route, func (ctx *web.Context) {
 		action := NewAction()
