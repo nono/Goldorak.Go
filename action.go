@@ -1,7 +1,7 @@
 package goldorak
 
 import (
-	"gostache"
+	"mustache"
 	"log"
 	"strings"
 	"web"
@@ -60,7 +60,7 @@ func (this *Action) NoLayout() {
 func (this *Action) Render() string {
 	log.Stdoutf("Rendering %s", this.template)
 	filename := GetConfig("templates") + "/" + this.template + ".mustache"
-	output, err := gostache.RenderFile(filename, this.locals)
+	output, err := mustache.RenderFile(filename, this.locals)
 	if err != nil {
 		log.Stderrf("Error on rendering %s", filename, err)
 		return "" // TODO error page
