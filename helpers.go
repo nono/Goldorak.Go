@@ -37,3 +37,12 @@ func Parameterize(s string) string {
 	return string(t)
 }
 
+// Pluralize(1, 'piano', 'pianos') => "1 piano"
+// TODO Pluralize(2, 'piano') => "2 pianos"
+func Pluralize(count int, singular string, plural string) string {
+	if count <= 1 {
+		return string(count) + " " + singular
+	}
+	return string(count) + " " + plural
+}
+
