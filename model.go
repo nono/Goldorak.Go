@@ -84,17 +84,18 @@ func (this *Model) Set(key string, value string) os.Error {
 }
 
 func (this *Model) Create(param string) *Instance {
+	p := Parameterize(param)
 	id, err := this.NextId()
 	if err != nil {
 		log.Stderrf("Impossible to create an instance of %s", this.name, err)
 		return nil
 	}
-	err = this.Set(param, string(id))
+	err = this.Set(p, string(id))
 	if err != nil {
 		log.Stderrf("Impossible to create an instance of %s", this.name, err)
 		return nil
 	}
-	return &Instance{this, id, param}
+	return &Instance{this, id, p}
 }
 
 func (this *Model) Find(param string) *Instance {
