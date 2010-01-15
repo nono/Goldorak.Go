@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 	"unicode"
 )
@@ -38,8 +39,16 @@ func Parameterize(s string) string {
 }
 
 // Pluralize(1, 'piano', 'pianos') => "1 piano"
-// TODO Pluralize(2, 'piano') => "2 pianos"
-func Pluralize(count int, singular string, plural string) string {
+// Pluralize(2, 'piano') => "2 pianos"
+func Pluralize(count int, a ...) string {
+	var singular, plural string
+	v := reflect.NewValue(a).(*reflect.StructValue)
+	singular = v.Field(0).(*reflect.StringValue).Get()
+	if v.NumField() > 1 {
+		plural = v.Field(1).(*reflect.StringValue).Get()
+	} else {
+		plural = singular + "s"
+	}
 	if count <= 1 {
 		return string(count) + " " + singular
 	}
