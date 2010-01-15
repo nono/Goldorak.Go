@@ -11,7 +11,7 @@ type Action struct {
 	responded bool
 	layout    *Action
 	template  string
-	locals    map[string]string
+	locals    map[string]interface{}
 	context   *web.Context
 }
 
@@ -27,7 +27,7 @@ func ctxHandler(handler func(*Action, []string)) (func(ctx *web.Context)) {
 		if !action.responded {
 			action.responded = true
 			ctx.StartResponse(200)
-			ctx.WriteString(action.Render())
+			ctx.WriteString(action.Render(action.locals))
 		}
 	}
 	return f
@@ -51,14 +51,14 @@ func DefaultLayout(handler func(*Action)) {
 }
 
 func NewAction() Action {
-	return Action{false, nil, "", make(map[string]string), nil}
+	return Action{false, nil, "", make(map[string]interface{}), nil}
 }
 
 func (this *Action) Template(template string) {
 	this.template = template
 }
 
-func (this *Action) Assign(key string, value string) {
+func (this *Action) Assign(key string, value interface{}) {
 	this.locals[key] = value
 }
 
@@ -72,18 +72,16 @@ func (this *Action) NoLayout() {
 	this.layout = nil
 }
 
-func (this *Action) Render() string {
+func (this *Action) Render(context interface{}) string {
 	log.Stdoutf("Rendering %s", this.template)
 	filename := GetConfig("templates") + "/" + this.template + ".mustache"
-	output, err := mustache.RenderFile(filename, this.locals)
+	output, err := mustache.RenderFile(filename, context)
 	if err != nil {
 		log.Stderrf("Error on rendering %s", filename, err)
 		return "" // TODO error page
 	}
 	if this.layout != nil {
-		this.layout.locals["yield"] = output
-		output = this.layout.Render()
-		this.layout.locals["yield"] = "", false
+		output = this.layout.Render(map[string]string{"yield": output})
 	}
 	return output
 }
