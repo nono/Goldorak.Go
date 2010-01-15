@@ -54,6 +54,10 @@ func NewAction() Action {
 	return Action{false, nil, "", make(map[string]interface{}), nil}
 }
 
+func (this *Action) Param(key string) []string {
+	return this.context.Request.Params[key]
+}
+
 func (this *Action) Template(template string) {
 	this.template = template
 }
