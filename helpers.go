@@ -25,7 +25,7 @@ func StaticUrl(filename string) string {
 }
 
 func Parameterize(s string) string {
-	runes := strings.Runes(s)
+	runes := strings.Runes(strings.ToLower(s))
 	t := make([]int, len(runes))
 	for i := 0; i < len(runes); i++ {
 		rune := runes[i]
