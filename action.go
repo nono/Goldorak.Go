@@ -11,7 +11,7 @@ type Action struct {
 	responded bool
 	layout    *Action
 	template  string
-	locals    map[string]interface{}
+	locals    map[string]string
 	context   *web.Context
 }
 
@@ -51,7 +51,7 @@ func DefaultLayout(handler func(*Action)) {
 }
 
 func NewAction() Action {
-	return Action{false, nil, "", make(map[string]interface{}), nil}
+	return Action{false, nil, "", make(map[string]string), nil}
 }
 
 func (this *Action) Param(key string) []string {
@@ -62,7 +62,7 @@ func (this *Action) Template(template string) {
 	this.template = template
 }
 
-func (this *Action) Assign(key string, value interface{}) {
+func (this *Action) Assign(key string, value string) {
 	this.locals[key] = value
 }
 

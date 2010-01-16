@@ -104,6 +104,9 @@ func (this *Model) Find(param string) *Instance {
 		log.Stderrf("Impossible to find %s (%s)", param, this.name, err)
 		return nil
 	}
+	if value == "" {
+		return nil
+	}
 	id, err := strconv.Atoi64(value)
 	if err != nil {
 		log.Stderrf("Impossible to convert %s to int", value, err)
